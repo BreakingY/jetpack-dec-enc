@@ -1,7 +1,7 @@
 # jetpack_dec_enc
 Jetson Video Encoding and Decoding Jetpack5.x视频编解码库
 * 本人在之前遇到过需要使用jetson进行视频编解码场景，回想当时搞jetson_multimedia_api的时候非常痛苦，所以开源了封装代码，希望能够帮助更多人。英伟达提供了一套视频编解码API Video_Codec_SDK 调用比较简单且很好用，但遗憾的是Jetson不支持Video_Codec_SDK视频编解码，而是自己搞了一套jetson_multimedia_api。jetson_multimedia_api使用v4l2的编解码流程，比较偏向底层。如果不了解v4l2，jetson_multimedia_api还是挺晦涩难懂的
-* 实现了从h264裸流中读取NALU，用ffmpeg从mp4文件中读取音视频、解析视频NALU、实现简单的音视频同步。想要了解H264/H265基础码流结构、ffmpeg API的同学也可以看过来
+* 这里实现了从h264裸流中读取NALU，用ffmpeg从mp4文件中读取音视频、解析视频NALU、实现简单的音视频同步。想要了解H264/H265基础码流结构、ffmpeg API的同学也可以看过来
 * Jetpack版本： 5.0.2
 * Jetpack 5.x编解码是通用的，但是5.0.2编译出来的库不能直接在其他5.x版本上使用，把代码放到目标机器上重新编译即可(不需要替换jetson_multimedia_api头文件)
 
