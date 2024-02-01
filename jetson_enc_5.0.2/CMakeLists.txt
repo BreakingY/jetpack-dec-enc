@@ -1,0 +1,18 @@
+cmake_minimum_required(VERSION 3.0)
+project(JETSONTEST)
+
+include_directories(./ ./include ./include/libjpeg-8b  /usr/include/libdrm)
+
+aux_source_directory(./ TEST)
+aux_source_directory(./test DEMO)
+aux_source_directory(./common/classes COMMON)
+add_compile_options(-g  -fpermissive -std=gnu++1y) 
+link_directories(/usr/lib/aarch64-linux-gnu/tegra /lib/aarch64-linux-gnu /usr/local/lib /usr/lib)
+set(EXECUTABLE_OUTPUT_PATH ./)
+set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ./)
+set(CMAKE_BUILD_TYPE Release)
+add_library(JetsonEnc SHARED ${TEST} ${COMMON})
+target_link_libraries(JetsonEnc pthread v4l2 EGL GLESv2 X11 nvbufsurface nvbufsurftransform nvjpeg nvosd drm cuda cudart)
+
+add_executable(demo ${DEMO})
+target_link_libraries(demo JetsonEnc)
