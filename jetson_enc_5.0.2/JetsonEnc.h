@@ -61,6 +61,7 @@ public:
     void SetDecCallBack(JetsonEncListner *call_func);
     void UnSetDecCallBack();
     void AddFrame(unsigned char *data, int len);
+    int GetQueueSize();
 
 public:
     // jetson enc func

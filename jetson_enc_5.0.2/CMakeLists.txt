@@ -1,7 +1,9 @@
 cmake_minimum_required(VERSION 3.0)
 project(JETSONTEST)
+find_package(CUDA REQUIRED)
+enable_language(CUDA)
 
-include_directories(./ ./include ./include/libjpeg-8b  /usr/include/libdrm)
+include_directories(${CUDA_INCLUDES} ./ ./include ./include/libjpeg-8b  /usr/include/libdrm)
 
 aux_source_directory(./ TEST)
 aux_source_directory(./test DEMO)
@@ -12,7 +14,7 @@ set(EXECUTABLE_OUTPUT_PATH ./)
 set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ./)
 set(CMAKE_BUILD_TYPE Release)
 add_library(JetsonEnc SHARED ${TEST} ${COMMON})
-target_link_libraries(JetsonEnc pthread v4l2 EGL GLESv2 X11 nvbufsurface nvbufsurftransform nvjpeg nvosd drm cuda cudart)
+target_link_libraries(JetsonEnc ${CUDA_LIBRARIES} pthread v4l2 EGL GLESv2 X11 nvbufsurface nvbufsurftransform nvjpeg nvosd drm cuda)
 
 add_executable(demo ${DEMO})
 target_link_libraries(demo JetsonEnc)

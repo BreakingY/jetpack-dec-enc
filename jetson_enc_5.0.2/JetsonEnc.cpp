@@ -28,6 +28,8 @@ void JetsonEnc::AddFrame(unsigned char *data, int len)
     node->data = data;
     node->len = len;
     pthread_mutex_lock(&data_mutex);
+#if 0
+    // 编码丢帧
     if (data_list.size() > 5) {
         while (!data_list.empty()) {
             YUVData *tmp = data_list.front();
@@ -35,9 +37,17 @@ void JetsonEnc::AddFrame(unsigned char *data, int len)
             delete tmp;
         }
     }
+#endif
     data_list.push_back(node);
     pthread_mutex_unlock(&data_mutex);
     pthread_cond_signal(&data_cond);
+}
+int JetsonEnc::GetQueueSize(){
+    int size;
+    pthread_mutex_lock(&data_mutex);
+    size = data_list.size();
+    pthread_mutex_unlock(&data_mutex);
+    return size;
 }
 JetsonEnc::~JetsonEnc()
 {

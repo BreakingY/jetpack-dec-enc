@@ -37,7 +37,7 @@ void Wrapper::OnJetsonDecData(unsigned char *data, int data_len, uint64_t timest
     if(dec_fd==NULL){
             dec_fd= fopen(dec_filename, "wb");
     }
-    fwrite(jetson_addr_, 1, 1920 * 1080 * 3/2, dec_fd);
+    fwrite(jetson_addr_, 1, 1920 * 1080 * 3 / 2, dec_fd);
 #endif
 }
 void OnData(char *pBuf, int len, void *param)
@@ -78,6 +78,7 @@ int main(int argc, char **argv)
 #include <fstream>
 #include <iostream>
 #include <vector>
+bool run_flag = true;
 class Wrapper : public JetsonDecListner, public MediaDataListner
 {
 public:
@@ -87,6 +88,7 @@ public:
     void OnVideoData(VideoData data);
     void OnAudioData(AudioData data);
     void MediaOverhandle();
+
 public:
     MediaReader *file_reader_;
     JetsonDec *jetson_dec_obj_ = NULL;
@@ -119,6 +121,7 @@ Wrapper::~Wrapper()
         free(jetson_addr_);
         jetson_addr_ = NULL;
     }
+    printf("~Wrapper\n");
 }
 // with startcode
 void Wrapper::OnVideoData(VideoData data)
@@ -154,8 +157,14 @@ void Wrapper::OnAudioData(AudioData data)
 }
 void Wrapper::MediaOverhandle()
 {
+
     printf("MediaOverhandle....\n");
+#if 0
+    // 循环,压力测试
     file_reader_->reset();
+#else
+    run_flag = false;
+#endif
     return;
 }
 char *dec_filename = "out.yuv";
@@ -166,7 +175,7 @@ void Wrapper::OnJetsonDecData(unsigned char *data, int data_len, uint64_t timest
     gettimeofday(&time_dec, NULL);
     long int time_stamp = 1000 * (time_dec.tv_sec) + (time_dec.tv_usec) / 1000;
 
-    frames_ ++;
+    frames_++;
     int n = 100;
     int delay = time_stamp - timestamp;
     if (frames_ > n) {
@@ -174,14 +183,13 @@ void Wrapper::OnJetsonDecData(unsigned char *data, int data_len, uint64_t timest
     }
     if (frames_ % 20 == 0) {
         printf("delay:%ld avg:%d\n", delay, total_ / (frames_ - n));
-        
     }
 #if 0
     // write to file , NV12
     if(dec_fd==NULL){
             dec_fd= fopen(dec_filename, "wb");
     }
-    fwrite(jetson_addr_, 1, width_ * height_ * 3/2, dec_fd);
+    fwrite(jetson_addr_, 1, width_ * height_ * 3 / 2, dec_fd);
 #endif
 }
 int main(int argc, char **argv)
@@ -196,8 +204,8 @@ int main(int argc, char **argv)
         Wrapper *test = new Wrapper(argv[1]);
         obj_list.push_back(test);
     }
-    while (true) {
-        usleep(1000 * 1000 * 30);
+    while (run_flag) { // 如果要压力测试，测试性能，这里可以使用while(true)
+        usleep(1000 * 100);
     }
     for (int i = 0; i < obj_list.size(); i++) {
         Wrapper *obj = obj_list[i];
