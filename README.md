@@ -1,6 +1,6 @@
 # jetpack-dec-enc
 Jetson Video Encoding and Decoding 
-Jetpack5.x视频编解码库
+jetson Jetpack5.x视频编解码库
 * 项目实现了从h264裸流中读取NALU，用ffmpeg从mp4等媒体文件中读取音视频、解析视频NALU、实现简单的音视频同步。想要了解H264/H265基础码流结构、ffmpeg API的同学也可以看过来
 * Jetpack版本： 5.0.2
 * Jetpack 5.x编解码是通用的，但是5.0.2编译出来的库不能直接在其他5.x版本上使用，把代码放到目标机器上重新编译即可(不需要替换jetson_multimedia_api头文件)
