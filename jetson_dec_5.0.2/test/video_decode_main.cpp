@@ -18,7 +18,7 @@ public:
 Wrapper::Wrapper(char *path)
 {
     file_ = path;
-    jetson_dec_obj_ = new JetsonDec(V4L2_PIX_FMT_H264, 1920, 1080, jetson_addr_);
+    jetson_dec_obj_ = new JetsonDec(V4L2_PIX_FMT_H264, 1280, 720, jetson_addr_);
     decoder_pixfmt_ = V4L2_PIX_FMT_H264;
     jetson_dec_obj_->SetDecCallBack(static_cast<JetsonDecListner *>(this));
 }
@@ -35,9 +35,9 @@ void Wrapper::OnJetsonDecData(unsigned char *data, int data_len, uint64_t timest
     }
 #if 0
     if(dec_fd==NULL){
-            dec_fd= fopen(dec_filename, "wb");
+        dec_fd= fopen(dec_filename, "wb");
     }
-    fwrite(jetson_addr_, 1, 1920 * 1080 * 3 / 2, dec_fd);
+    fwrite(jetson_addr_, 1, 1280 * 720 * 3 / 2, dec_fd);
 #endif
 }
 void OnData(char *pBuf, int len, void *param)
@@ -184,10 +184,10 @@ void Wrapper::OnJetsonDecData(unsigned char *data, int data_len, uint64_t timest
     if (frames_ % 20 == 0) {
         printf("delay:%ld avg:%d\n", delay, total_ / (frames_ - n));
     }
-#if 0
+#if 1
     // write to file , NV12
     if(dec_fd==NULL){
-            dec_fd= fopen(dec_filename, "wb");
+        dec_fd= fopen(dec_filename, "wb");
     }
     fwrite(jetson_addr_, 1, width_ * height_ * 3 / 2, dec_fd);
 #endif

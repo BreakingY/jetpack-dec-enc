@@ -16,7 +16,7 @@ static inline int startCode4(unsigned char *buf)
 }
 
 /*通过指定的buf，读取一个NALU数据到frame中*/
-int getNALUFromBuf(unsigned char *frame, struct buf_st *buf)
+int getNALUFromBuf(unsigned char **frame, struct buf_st *buf)
 {
     int startCode;
     unsigned char *pstart;
@@ -58,7 +58,7 @@ int getNALUFromBuf(unsigned char *frame, struct buf_st *buf)
         frameSize = buf->bufsize - buf->pos;
     }
 
-    memcpy(frame, buf->buf + buf->pos, frameSize);
+    *frame = buf->buf + buf->pos;
 
     buf->pos += frameSize;
     /*buf中的数据全部读取完毕，设置buf状态为WREIT*/
@@ -72,26 +72,26 @@ int getNALUFromBuf(unsigned char *frame, struct buf_st *buf)
 void MediaReader::praseFrame()
 {
     /*frameREAD,bufferWRITE状态不可访问*/
-    if (frame.stat == READ || buffer.stat == WRITE) {
+    if (frame->stat == READ || buffer->stat == WRITE) {
         printf("stat err\n");
         return;
     }
 
     /*buf处于可读状态并且frame处于可写状态*/
-    frame.frameSize = getNALUFromBuf(frame.frame, &buffer);
+    frame->frameSize = getNALUFromBuf(&frame->frame, buffer);
 
-    if (frame.frameSize < 0) {
+    if (frame->frameSize < 0) {
         printf("getNALUFromBuf err");
         return;
     }
 
-    if (startCode3(frame.frame))
-        frame.startCode = 3;
+    if (startCode3(frame->frame))
+        frame->startCode = 3;
     else
-        frame.startCode = 4;
-    frame.stat = READ;
-    /*for(int i=0;i<frame.frameSize+frame.startCode;i++)
-               printf("%0x",frame.frame[i]);*/
+        frame->startCode = 4;
+    frame->stat = READ;
+    /*for(int i=0;i<frame->frameSize+frame->startCode;i++)
+               printf("%0x",frame->frame[i]);*/
     return;
 }
 static double r2d(AVRational r)
@@ -199,13 +199,13 @@ MediaReader::MediaReader(char *file_path)
 {
     file = file_path;
 
-    memset(buffer.buf, 0, BUFF_MAX);
-    buffer.bufsize = 0;
-    buffer.pos = 0;
-    buffer.stat = WRITE;
+    buffer = (struct buf_st *)malloc(sizeof(struct buf_st));
+    buffer->bufsize = 0;
+    buffer->pos = 0;
+    buffer->stat = WRITE;
 
-    memset(frame.frame, 0, BUFF_MAX);
-    frame.stat = WRITE;
+    frame = (struct frame_st *)malloc(sizeof(struct frame_st));
+    frame->stat = WRITE;
     VideoInit(file_path);
 
     videoFinish = false;
@@ -377,13 +377,12 @@ void *MediaReader::VideoSyncThread(void *arg)
             if (self->isMP4) {
                 self->mp4toannexb(video_packet);
             }
-            memcpy(self->buffer.buf, video_packet.data, video_packet.size);
-            self->buffer.bufsize = video_packet.size;
-            self->buffer.stat = READ;
-            self->buffer.pos = 0;
+            self->buffer->buf = video_packet.data;
+            self->buffer->bufsize = video_packet.size;
+            self->buffer->stat = READ;
+            self->buffer->pos = 0;
             int pts = av_rescale_q(video_packet.pts, time_base, time_base_q);
             int dts = av_rescale_q(video_packet.dts, time_base, time_base_q);
-            av_packet_unref(&video_packet);
             int64_t now_time = av_gettime() - start_time;
             if (self->haveAudio()) {
                 int diff = curtimestamp - self->audio_now_time;
@@ -409,14 +408,14 @@ void *MediaReader::VideoSyncThread(void *arg)
                 }
             }
 
-            while (self->buffer.stat == READ) {
+            while (self->buffer->stat == READ) {
                 self->praseFrame();
-                if (self->frame.stat == WRITE) {
+                if (self->frame->stat == WRITE) {
                     continue;
                 }
                 VideoData data;
-                data.data = self->frame.frame;         //+self->frame.startCode;
-                data.data_len = self->frame.frameSize; //-self->frame.startCode;
+                data.data = self->frame->frame;         //+self->frame->startCode;
+                data.data_len = self->frame->frameSize; //-self->frame->startCode;
                 data.pts = pts;
                 data.dts = dts;
 
@@ -429,16 +428,17 @@ void *MediaReader::VideoSyncThread(void *arg)
                     type = (data.data[0] >> 1) & 0x3f;
                 }
                 // type == 9为分隔符
-                if (type == 9 || self->frame.frameSize <= self->frame.startCode) {
-                    self->frame.stat = WRITE;
+                if (type == 9 || self->frame->frameSize <= self->frame->startCode) {
+                    self->frame->stat = WRITE;
                     continue;
                 }
 
                 if (self->DataListner) {
                     self->DataListner->OnVideoData(data);
                 }
-                self->frame.stat = WRITE;
+                self->frame->stat = WRITE;
             }
+            av_packet_unref(&video_packet);
         } else {
             auto now = std::chrono::system_clock::now();
             std::chrono::steady_clock::time_point t1 = std::chrono::steady_clock::now();
@@ -540,6 +540,14 @@ MediaReader::~MediaReader()
     av_packet_unref(&m_packet);
     if (isMP4) {
         av_bitstream_filter_close(m_ph26xbsfc);
+    }
+    if(buffer){
+        free(buffer);
+        buffer = NULL;
+    }
+    if(frame){
+        free(buffer);
+        buffer = NULL;
     }
     DEBUGPRINT("~MediaReader\n");
 }

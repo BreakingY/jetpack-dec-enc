@@ -29,7 +29,7 @@ Jetson Video Encoding and Decoding ; Jetson Jetpack5.x视频编解码库
 * cd build
 * cmake ..
 * make -j4
-* 测试 ./demo ../../test_video/test-1920x1080.mp4 1
+* 测试 ./demo ../../test_video/test_1280x720_v.mp4 1
 
 2. 编码
 * export PATH=$PATH:/usr/local/cuda/bin
