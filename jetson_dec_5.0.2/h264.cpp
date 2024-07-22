@@ -105,4 +105,5 @@ int NALUInit(char *filename, NALU_CallBack call_func, void *param)
     arg->p_param = param;
     arg->path = strdup(filename);
     pthread_create(&tid, NULL, thread_func, arg);
+    return 0;
 }

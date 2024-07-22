@@ -39,6 +39,7 @@ void Wrapper::OnJetsonDecData(unsigned char *data, int data_len, uint64_t timest
     }
     fwrite(jetson_addr_, 1, 1280 * 720 * 3 / 2, dec_fd);
 #endif
+    return;
 }
 void OnData(char *pBuf, int len, void *param)
 {
@@ -191,6 +192,7 @@ void Wrapper::OnJetsonDecData(unsigned char *data, int data_len, uint64_t timest
     }
     fwrite(jetson_addr_, 1, width_ * height_ * 3 / 2, dec_fd);
 #endif
+    return;
 }
 int main(int argc, char **argv)
 {

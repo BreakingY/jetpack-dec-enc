@@ -26,10 +26,12 @@ JetsonDec::JetsonDec(uint32_t decoder_pixfmt, int width, int height, unsigned ch
 void JetsonDec::SetDecCallBack(JetsonDecListner *call_func)
 {
     p_callback = call_func;
+    return;
 }
 void JetsonDec::UnSetDecCallBack()
 {
     p_callback = NULL;
+    return;
 }
 JetsonDec::~JetsonDec()
 {
@@ -70,6 +72,7 @@ void JetsonDec::AddEsData(unsigned char *data, int len)
     data_list.push_back(pData);
     pthread_mutex_unlock(&mutex_data);
     pthread_cond_signal(&cond_data);
+    return;
 }
 int JetsonDec::GetQueueSize()
 {
@@ -179,6 +182,7 @@ static void set_defaults(context_t *ctx)
     ctx->fps = 30;
     ctx->nvosd_context = NULL;
     ctx->dst_dma_fd = -1;
+    return;
 }
 
 /**

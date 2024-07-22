@@ -15,10 +15,12 @@ JetsonEnc::JetsonEnc(int width, int height)
 void JetsonEnc::SetDecCallBack(JetsonEncListner *call_func)
 {
     p_callback = call_func;
+    return;
 }
 void JetsonEnc::UnSetDecCallBack()
 {
     p_callback = NULL;
+    return;
 }
 void JetsonEnc::AddFrame(unsigned char *data, int len)
 {
@@ -41,6 +43,7 @@ void JetsonEnc::AddFrame(unsigned char *data, int len)
     data_list.push_back(node);
     pthread_mutex_unlock(&data_mutex);
     pthread_cond_signal(&data_cond);
+    return;
 }
 int JetsonEnc::GetQueueSize(){
     int size;
@@ -132,6 +135,7 @@ abort(context_t_enc *ctx)
 {
     ctx->got_error = true;
     ctx->enc->abort();
+    return;
 }
 static const char *
 get_pixfmt_string(uint32_t pixfmt)
@@ -160,6 +164,7 @@ get_pixfmt_string(uint32_t pixfmt)
     default:
         return "";
     }
+    return "";
 }
 /**
  * Initialise CRC Rec and creates CRC Table based on the polynomial.
