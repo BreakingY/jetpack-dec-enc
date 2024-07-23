@@ -15,7 +15,7 @@ Jetson Video Encoding and Decoding ; Jetson Jetpack5.x视频编解码库
 # jetson_enc_5.0.2
 * 基于Jetpack 5.0.2 jetson_multimedia_api 的视频编码库，实现过程参考jetson_multimedia_api/samples/01_video_encode
 * 输入：YUV420P,编码器输出：H264。
-* 如需H265可自行修改(JetsonEnc::encode_proc函数/JetsonEnc.cpp)，还是比较简单的
+* 如需H265可自行修改(JetsonEnc::encode_proc函数/JetsonEnc.cpp)，还是比较简单的。编码参数在void *JetsonEnc::encode_proc(void *arg)中，可根据需求自行修改，修改 / * set your enc arg */注释下的参数即可。
 * 生成动态库libJetsonEnc.so,头文件 + libJetsonEnc.so 即可作为第三方库使用
 
 
