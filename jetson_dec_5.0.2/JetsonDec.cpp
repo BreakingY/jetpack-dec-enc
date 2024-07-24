@@ -126,6 +126,7 @@ int JetsonDec::read_decoder_input_nalu(NvBuffer *buffer, char *parse_buffer, str
     buffer->planes[0].bytesused = node->len;
     time = node->time;
     delete node;
+    proc_ready = true;
     return 0;
 }
 int JetsonDec::dump_dmabuf_ptr(int dmabuf_fd, unsigned int plane, int *len, unsigned char *outbuffer)
@@ -525,7 +526,7 @@ void *JetsonDec::decode_proc(void *arg)
 
     // pthread_create(&ctx.dec_capture_loop, NULL, self->dec_capture_loop_fcn, self);
     // pthread_setname_np(ctx.dec_capture_loop,"CapturePlane");
-    self->proc_ready = true;
+    // self->proc_ready = true;
 
     /* Read encoded data and enqueue all the output plane buffers.
        Exit loop in case end of file */
