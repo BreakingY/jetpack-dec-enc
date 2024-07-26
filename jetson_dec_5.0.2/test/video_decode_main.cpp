@@ -103,7 +103,7 @@ public:
 Wrapper::Wrapper(char *path)
 {
     file_reader_ = new MediaReader(path);
-    file_reader_->setDataListner(static_cast<MediaDataListner *>(this), [this]() {
+    file_reader_->SetDataListner(static_cast<MediaDataListner *>(this), [this]() {
         return this->MediaOverhandle();
     });
     file_ = path;
@@ -127,9 +127,9 @@ Wrapper::~Wrapper()
 // with startcode
 void Wrapper::OnVideoData(VideoData data)
 {
-    enum VideoType videoType = file_reader_->getVideoType();
-    width_ = file_reader_->m_pFormatCtx->streams[file_reader_->video_index]->codecpar->width;
-    height_ = file_reader_->m_pFormatCtx->streams[file_reader_->video_index]->codecpar->height;
+    enum VideoType videoType = file_reader_->GetVideoType();
+    width_ = file_reader_->format_ctx_->streams[file_reader_->video_index_]->codecpar->width;
+    height_ = file_reader_->format_ctx_->streams[file_reader_->video_index_]->codecpar->height;
     if (videoType == VIDEO_H264) {
         decoder_pixfmt_ = V4L2_PIX_FMT_H264;
     }
@@ -162,7 +162,7 @@ void Wrapper::MediaOverhandle()
     printf("MediaOverhandle....\n");
 #if 0
     // 循环,压力测试
-    file_reader_->reset();
+    file_reader_->Reset();
 #else
     run_flag = false;
 #endif
