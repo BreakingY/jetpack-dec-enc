@@ -542,7 +542,6 @@ MediaReader::~MediaReader()
     }
     avformat_close_input(&format_ctx_);
     avformat_free_context(format_ctx_);
-    format_ctx_ =nullptr;
     av_packet_unref(&packet_);
     if(bsf_ctx_){
         av_bsf_free(&bsf_ctx_);
