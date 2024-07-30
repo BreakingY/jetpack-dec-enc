@@ -148,7 +148,9 @@ void Wrapper::OnVideoData(VideoData data)
         try_cnt++;
         printf("GetQueueSize:%d\n", jetson_dec_obj_->GetQueueSize());
     }
-    jetson_dec_obj_->AddEsData((unsigned char *)data.data, data.data_len);
+    struct timeval time_now;
+    gettimeofday(&time_now, NULL);
+    jetson_dec_obj_->AddEsData((unsigned char *)data.data, data.data_len, time_now);
     return;
 }
 void Wrapper::OnAudioData(AudioData data)

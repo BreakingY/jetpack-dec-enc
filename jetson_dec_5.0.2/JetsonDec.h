@@ -60,7 +60,7 @@ typedef struct MediaDtatSt {
 class JetsonDecListner
 {
 public:
-    virtual void OnJetsonDecData(unsigned char *data, int data_len, uint64_t timestamp) = 0;
+    virtual void OnJetsonDecData(unsigned char *data, int data_len, uint64_t timestamp) = 0; // timestamp 为JetsonDec::AddEsData中传入的时间戳(视频解码前的原始时间戳)
 };
 
 class JetsonDec
@@ -71,7 +71,7 @@ public:
     ~JetsonDec();
     void SetDecCallBack(JetsonDecListner *call_func);
     void UnSetDecCallBack();
-    void AddEsData(unsigned char *data, int len);
+    void AddEsData(unsigned char *data, int len, struct timeval time_data); // 当前data时间戳，可通过gettimeofday获取
     int GetQueueSize();
 public:
     //jetson dec func

@@ -58,15 +58,13 @@ JetsonDec::~JetsonDec()
     }
     printf("~JetsonDec()\n");
 }
-void JetsonDec::AddEsData(unsigned char *data, int len)
+void JetsonDec::AddEsData(unsigned char *data, int len, struct timeval time_data)
 {
     MediaDtat *pData = new MediaDtat();
     pData->data = (unsigned char *)malloc(len);
     memcpy(pData->data, data, len);
     pData->len = len;
-    struct timeval time_now;
-    gettimeofday(&time_now, NULL);
-    pData->time = time_now;
+    pData->time = time_data;
 
     pthread_mutex_lock(&mutex_data);
     data_list.push_back(pData);
@@ -180,7 +178,7 @@ static void set_defaults(context_t *ctx)
     ctx->window_x = 0;
     ctx->window_y = 0;
     ctx->out_pixfmt = 1;
-    ctx->fps = 30;
+    // ctx->fps = 30; // not use
     ctx->nvosd_context = NULL;
     ctx->dst_dma_fd = -1;
     return;
