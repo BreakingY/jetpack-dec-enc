@@ -71,7 +71,7 @@ public:
     ~JetsonDec();
     void SetDecCallBack(JetsonDecListner *call_func);
     void UnSetDecCallBack();
-    void AddEsData(unsigned char *data, int len, struct timeval time_data); // 当前data时间戳，可通过gettimeofday获取
+    void AddEsData(unsigned char *data, int len, uint64_t time_data); // 当前data时间戳，毫秒
     int GetQueueSize();
 public:
     //jetson dec func

@@ -9,7 +9,7 @@
 #include <sys/stat.h>
 #include <sys/types.h>
 #include <unistd.h>
-typedef void (*NALU_CallBack)(char *pBuf, int len, void *param);
+typedef void (*NALU_CallBack)(char *buf, int len, void *param);
 
 int NALUInit(char *filename, NALU_CallBack call_func, void *param);
 

@@ -3,7 +3,7 @@
 
 #define BUFFER 2 * 1024 * 1024
 typedef struct Arg {
-    NALU_CallBack P_pCallBack;
+    NALU_CallBack p_callback;
     void *p_param;
     char *path;
 } Arg;
@@ -87,7 +87,7 @@ static void *thread_func(void *arg)
             startCode = 4;
 
         // frameSize -= startCode;
-        p_arg->P_pCallBack(frame, frameSize, p_arg->p_param);
+        p_arg->p_callback(frame, frameSize, p_arg->p_param);
         usleep(1000 * 1000 / fps);
     }
     free(frame);
@@ -101,7 +101,7 @@ int NALUInit(char *filename, NALU_CallBack call_func, void *param)
 {
     pthread_t tid;
     Arg *arg = (Arg *)malloc(sizeof(Arg));
-    arg->P_pCallBack = call_func;
+    arg->p_callback = call_func;
     arg->p_param = param;
     arg->path = strdup(filename);
     pthread_create(&tid, NULL, thread_func, arg);

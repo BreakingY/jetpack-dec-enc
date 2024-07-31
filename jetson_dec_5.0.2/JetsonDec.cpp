@@ -58,13 +58,19 @@ JetsonDec::~JetsonDec()
     }
     printf("~JetsonDec()\n");
 }
-void JetsonDec::AddEsData(unsigned char *data, int len, struct timeval time_data)
+static void convert_ms_to_timeval(uint64_t ms, struct timeval &tv) {
+    tv.tv_sec = ms / 1000;
+    tv.tv_usec = (ms % 1000) * 1000;
+}
+void JetsonDec::AddEsData(unsigned char *data, int len, uint64_t time_data)
 {
     MediaDtat *pData = new MediaDtat();
     pData->data = (unsigned char *)malloc(len);
     memcpy(pData->data, data, len);
     pData->len = len;
-    pData->time = time_data;
+    struct timeval tv;
+    convert_ms_to_timeval(time_data, tv);
+    pData->time = tv;
 
     pthread_mutex_lock(&mutex_data);
     data_list.push_back(pData);

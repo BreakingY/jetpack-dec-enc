@@ -41,7 +41,7 @@ void Wrapper::OnJetsonDecData(unsigned char *data, int data_len, uint64_t timest
 #endif
     return;
 }
-void OnData(char *pBuf, int len, void *param)
+void OnData(char *buf, int len, void *param)
 {
     Wrapper *self = (Wrapper *)param;
     int try_cnt = 0;
@@ -50,7 +50,10 @@ void OnData(char *pBuf, int len, void *param)
         try_cnt++;
         printf("GetQueueSize:%d\n", self->jetson_dec_obj_->GetQueueSize());
     }
-    self->jetson_dec_obj_->AddEsData((unsigned char *)pBuf, len);
+    struct timeval time_now;
+    gettimeofday(&time_now, NULL);
+    uint64_t timestamp = 1000 * (time_now.tv_sec) + (time_now.tv_usec) / 1000;
+    self->jetson_dec_obj_->AddEsData((unsigned char *)buf, len, timestamp);
     return;
 }
 int main(int argc, char **argv)
@@ -150,7 +153,8 @@ void Wrapper::OnVideoData(VideoData data)
     }
     struct timeval time_now;
     gettimeofday(&time_now, NULL);
-    jetson_dec_obj_->AddEsData((unsigned char *)data.data, data.data_len, time_now);
+    uint64_t timestamp = 1000 * (time_now.tv_sec) + (time_now.tv_usec) / 1000;
+    jetson_dec_obj_->AddEsData((unsigned char *)data.data, data.data_len, timestamp);
     return;
 }
 void Wrapper::OnAudioData(AudioData data)
@@ -176,7 +180,7 @@ void Wrapper::OnJetsonDecData(unsigned char *data, int data_len, uint64_t timest
 {
     struct timeval time_dec;
     gettimeofday(&time_dec, NULL);
-    long int time_stamp = 1000 * (time_dec.tv_sec) + (time_dec.tv_usec) / 1000;
+    uint64_t time_stamp = 1000 * (time_dec.tv_sec) + (time_dec.tv_usec) / 1000;
 
     frames_++;
     int n = 100;
