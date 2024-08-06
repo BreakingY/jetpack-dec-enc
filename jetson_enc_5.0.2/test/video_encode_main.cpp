@@ -5,6 +5,7 @@
 char *input;
 int width;
 int height;
+int fps;
 char *output;
 std::ifstream yuv_file;
 std::ofstream output_file;
@@ -19,14 +20,15 @@ class EncDataWriter : public JetsonEncListner
 };
 int main(int argc, char **argv)
 {
-    if (argc < 5) {
-        printf("./demo input width height output(H264)");
+    if (argc < 6) {
+        printf("./demo input width height fps output(H264)\n");
         return -1;
     }
     input = argv[1];
     width = atoi(argv[2]);
     height = atoi(argv[3]);
-    output = argv[4];
+    fps = atoi(argv[4]);
+    output = argv[5];
     // input
     yuv_file.open(input, std::ios::binary);
     if (!yuv_file.is_open()) {
@@ -42,7 +44,7 @@ int main(int argc, char **argv)
         return -1;
     }
     // encoder
-    JetsonEnc *test = new JetsonEnc(width, height);
+    JetsonEnc *test = new JetsonEnc(width, height, fps);
     EncDataWriter *writer = new EncDataWriter;
     int frames = 0;
     test->SetDecCallBack(static_cast<JetsonEncListner *>(writer));
@@ -58,12 +60,12 @@ int main(int argc, char **argv)
         if(test->GetQueueSize() >= 5){
             usleep(1000 * 100);
         }
-        usleep(1000 * 40);
+        usleep(1000 * 1000 / fps);
     }
     printf("file over\n");
     // waiting encoder finish
     while(test->GetQueueSize() != 0){
-        usleep(1000 * 40);
+        usleep(1000 * 1000 / fps);
     }
     // release
     delete test;

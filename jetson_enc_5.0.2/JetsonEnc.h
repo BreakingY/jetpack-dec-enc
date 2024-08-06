@@ -56,7 +56,7 @@ public:
 class JetsonEnc
 {
 public:
-    JetsonEnc(int width, int height);
+    JetsonEnc(int width, int height, int video_fps);
     ~JetsonEnc();
     void SetDecCallBack(JetsonEncListner *call_func);
     void UnSetDecCallBack();
@@ -80,6 +80,7 @@ public:
     bool m_abort = false;
     int image_width;
     int image_height;
+    int fps;
     context_t_enc ctx;
     pthread_t job_tid;
     pthread_t out_tid;

@@ -40,7 +40,7 @@ Jetson Video Encoding and Decoding ; Jetson Jetpack5.x视频编解码库
 * cd build
 * cmake ..
 * make -j4
-* 测试 ./demo ../../test_video/352_288.yuv 352 288 output.h264
+* 测试 ./demo ../../test_video/352_288.yuv 352 288 25 output.h264
 
 # 温馨小提示
 * jetson CPU内存和GPU显存是共享的，所以如果使用cuda编程的同学注意，可以把显存地址传给编解码库，但需要使用cudaHostAlloc分配显存，最后一个参数用cudaHostAllocMapped，eg: cudaHostAlloc(&pJetsonAddr,width * heigh * 3,cudaHostAllocMapped)，把pJetsonAddr直接传递给JetsonDec解码类就可以用了，对于JetsonDec这个地址就是v4l2用的内存地址，对于你的应用程序这个地址就是cuda可用的显存地址，这样可节约cudaMemcpy的性能开销。JetsonDec亲测有效，JetsonEnc也是可行的，但是需要修改一下代码(看测试程序就可以知道，应用程序分配的内存是在JetsonEnc内部使用free释放的，但是cudaHostAlloc分配的地址需要使用cudaFreeHost释放才行)，因为并没有这个需求，所以没有实现这个功能。

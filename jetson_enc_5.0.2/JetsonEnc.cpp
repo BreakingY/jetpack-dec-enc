@@ -1,9 +1,10 @@
 #include "JetsonEnc.h"
 #include <unistd.h>
-JetsonEnc::JetsonEnc(int width, int height)
+JetsonEnc::JetsonEnc(int width, int height, int video_fps)
 {
     image_width = width;
     image_height = height;
+    fps = video_fps;
     m_abort = false;
     p_callback = NULL;
     pthread_mutex_init(&data_mutex, NULL);
@@ -1378,11 +1379,11 @@ void *JetsonEnc::encode_proc(void *arg)
     ctx.encoder_pixfmt = V4L2_PIX_FMT_H264;
     ctx.max_perf = 1;
     // ctx.bGapsInFrameNumAllowed = true;
-    ctx.fps_n = 10;
+    ctx.fps_n = self->fps;
     ctx.fps_d = 1;
     ctx.peak_bitrate = 1000000;
-    ctx.iframe_interval = 50;
-    ctx.idr_interval = 50;
+    ctx.iframe_interval = self->fps * 2;
+    ctx.idr_interval = self->fps * 2;
     ctx.insert_sps_pps_at_idr = true;
     // ctx.insert_aud = true;
     ctx.hw_preset_type = V4L2_ENC_HW_PRESET_ULTRAFAST;
