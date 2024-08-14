@@ -79,6 +79,7 @@ int main(int argc, char **argv)
 // MP4文件测试
 #include "MediaInterface.h"
 #include "MediaReader.h"
+#include "rtsp_client_proxy.h"
 #include <fstream>
 #include <iostream>
 #include <vector>
@@ -94,21 +95,37 @@ public:
     void MediaOverhandle();
 
 public:
-    MediaReader *file_reader_;
+    MediaReader *file_reader_ = NULL;
+    RtspClientProxy *rtsp_client_proxy_ = NULL;
+    enum VideoType video_type_;
     JetsonDec *jetson_dec_obj_ = NULL;
     std::string file_;
     uint32_t decoder_pixfmt_;
     unsigned char *jetson_addr_ = NULL;
     int64_t frames_ = 0;
-    int width_, height_;
+    int width_, height_, fps_;
     uint64_t total_ = 0;
+
+    bool rtsp_flag_ = false;
 };
 Wrapper::Wrapper(char *path)
 {
-    file_reader_ = new MediaReader(path);
-    file_reader_->SetDataListner(static_cast<MediaDataListner *>(this), [this]() {
-        return this->MediaOverhandle();
-    });
+    if( memcmp("rtsp://", path, strlen("rtsp://")) == 0 ){ // rtsp
+        rtsp_flag_ = true;
+        rtsp_client_proxy_ = new RtspClientProxy(path);
+        rtsp_client_proxy_->ProbeVideoFps(); // 必须在SetDataListner之前调用ProbeVideoFps,否则在RtspClientProxy::RtspVideoData调用data_listner_的时候会阻塞
+        rtsp_client_proxy_->GetVideoCon(width_, height_, fps_);
+        rtsp_client_proxy_->SetDataListner(static_cast<MediaDataListner *>(this), [this]() {
+            return this->MediaOverhandle();
+        });
+    }
+    else{ // file
+        file_reader_ = new MediaReader(path);
+        file_reader_->GetVideoCon(width_, height_, fps_);
+        file_reader_->SetDataListner(static_cast<MediaDataListner *>(this), [this]() {
+            return this->MediaOverhandle();
+        });
+    }
     file_ = path;
 }
 Wrapper::~Wrapper()
@@ -116,6 +133,10 @@ Wrapper::~Wrapper()
     if (file_reader_) {
         delete file_reader_;
         file_reader_ = NULL;
+    }
+    if(rtsp_client_proxy_){
+        delete rtsp_client_proxy_;
+        rtsp_client_proxy_ = NULL;
     }
     if (jetson_dec_obj_) {
         delete jetson_dec_obj_;
@@ -130,18 +151,29 @@ Wrapper::~Wrapper()
 // with startcode
 void Wrapper::OnVideoData(VideoData data)
 {
-    enum VideoType videoType = file_reader_->GetVideoType();
-    width_ = file_reader_->format_ctx_->streams[file_reader_->video_index_]->codecpar->width;
-    height_ = file_reader_->format_ctx_->streams[file_reader_->video_index_]->codecpar->height;
-    if (videoType == VIDEO_H264) {
+    if(rtsp_flag_ == true){ // rtsp
+        video_type_ = rtsp_client_proxy_->GetVideoType();
+        if (video_type_ == VIDEO_NONE) {
+            printf("only support H264/H265\n");
+            exit(1);
+        }
+    }
+    else{ // file 
+        video_type_ = file_reader_->GetVideoType();
+        if (video_type_ == VIDEO_NONE) {
+            printf("only support H264/H265\n");
+            exit(1);
+        }
+    }
+    if(video_type_ == VIDEO_H264){
         decoder_pixfmt_ = V4L2_PIX_FMT_H264;
     }
-    if (videoType == VIDEO_H265) {
+    else if(video_type_ == VIDEO_H265){
         decoder_pixfmt_ = V4L2_PIX_FMT_H265;
     }
     if (jetson_dec_obj_ == NULL) {
         jetson_addr_ = (unsigned char *)malloc(width_ * height_ * 4);
-        printf("width:%d height:%d\n", width_, height_);
+        printf("width:%d height:%d fps:%d\n", width_, height_, fps_);
         jetson_dec_obj_ = new JetsonDec(decoder_pixfmt_, width_, height_, jetson_addr_);
         jetson_dec_obj_->SetDecCallBack(static_cast<JetsonDecListner *>(this));
     }
@@ -168,7 +200,9 @@ void Wrapper::MediaOverhandle()
     printf("MediaOverhandle....\n");
 #if 0
     // 循环,压力测试
-    file_reader_->Reset();
+    if(!rtsp_flag_){
+        file_reader_->Reset();
+    }
 #else
     run_flag = false;
 #endif

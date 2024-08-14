@@ -7,7 +7,7 @@ Jetson Video Encoding and Decoding ; Jetson Jetpack5.x视频编解码库
 * Jetson视频编码：https://blog.csdn.net/weixin_43147845/article/details/136914320
 # jetson_dec_5.0.2
 * 基于Jetpack 5.0.2 jetson_multimedia_api 的视频解码库，支持解码H264、H265,实现过程参考jetson_multimedia_api/samples/02_video_dec_cuda
-* 测试程序完善，支持h264裸流、mp4测试文件，h264测试需要修改一下test/video_decode_main.cpp，修改if else分支即可、支持压力测试，可测试jetson解码性能
+* 测试程序完善，支持h264裸流文件、mp4文件、rtsp中读取视频流三种输入方式，h264裸文测试需要修改一下test/video_decode_main.cpp，修改if else分支即可、支持压力测试，可测试jetson解码性能
 * 输入：H264/H265  解码器输出：NV12
 * 生成动态库libJetsonDec.so,头文件 + libJetsonDec.so 即可作为第三方库使用
 
@@ -29,7 +29,9 @@ Jetson Video Encoding and Decoding ; Jetson Jetpack5.x视频编解码库
 * cd build
 * cmake ..
 * make -j4
-* 测试 ./demo ../../test_video/test_1280x720_v.mp4 1
+* 测试 
+    1. 文件测试：./demo ../../test_video/test_1280x720_v.mp4 1
+    2. RTSP测试：./demo your_rtsp_url 1
 
 2. 编码
 * export PATH=$PATH:/usr/local/cuda/bin

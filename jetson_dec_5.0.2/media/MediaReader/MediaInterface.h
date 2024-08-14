@@ -4,15 +4,6 @@
 #include <stdint.h>
 #include <stdio.h>
 #include <stdlib.h>
-enum VideoType {
-    VIDEO_NONE,
-    VIDEO_H264,
-    VIDEO_H265,
-};
-enum AudioType {
-    AUDIO_NONE,
-    AUDIO_AAC,
-};
 typedef struct AudioDataSt {
     unsigned char *data;
     int data_len;
@@ -31,8 +22,8 @@ typedef struct VideoDataSt {
 class MediaDataListner
 {
 public:
-    virtual void OnVideoData(VideoData data) = 0;
-    virtual void OnAudioData(AudioData data) = 0;
+    virtual void OnVideoData(VideoData data) = 0; // with startcode
+    virtual void OnAudioData(AudioData data) = 0; // widthout adts
 };
 using CloseCallbackFunc = std::function<void(void)>;
 
