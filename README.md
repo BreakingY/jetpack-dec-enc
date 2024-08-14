@@ -8,6 +8,8 @@ Jetson Video Encoding and Decoding ; Jetson Jetpack5.x视频编解码库
 # jetson_dec_5.0.2
 * 基于Jetpack 5.0.2 jetson_multimedia_api 的视频解码库，支持解码H264、H265,实现过程参考jetson_multimedia_api/samples/02_video_dec_cuda
 * 测试程序完善，支持h264裸流文件、mp4文件、rtsp中读取视频流三种输入方式，h264裸文测试需要修改一下test/video_decode_main.cpp，修改if else分支即可、支持压力测试，可测试jetson解码性能
+* MP4解封装由FFMPEG完成；RTSP客户端纯C++实现，不依赖任何库，地址：https://github.com/BreakingY/simple-rtsp-client
+* Bitstream：https://github.com/ireader/avcodec
 * 输入：H264/H265  解码器输出：NV12
 * 生成动态库libJetsonDec.so,头文件 + libJetsonDec.so 即可作为第三方库使用
 
