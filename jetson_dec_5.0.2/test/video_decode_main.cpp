@@ -225,7 +225,7 @@ void Wrapper::OnJetsonDecData(unsigned char *data, int data_len, uint64_t timest
     if (frames_ % 20 == 0) {
         printf("delay:%ld avg:%d\n", delay, total_ / (frames_ - n));
     }
-#if 1
+#if 0
     // write to file , NV12
     if(dec_fd==NULL){
         dec_fd= fopen(dec_filename, "wb");
