@@ -250,7 +250,7 @@ query_and_set_capture(context_t *ctx)
 
     params.memtag = NvBufSurfaceTag_VIDEO_CONVERT;
 
-    ret = NvBufSurf::NvAllocate(&params, 3, &ctx->dst_dma_fd); // 最大分配3个，不然会引发未知异常(程序可以运行，但是会影响dec_buffer地址)
+    ret = NvBufSurf::NvAllocate(&params, 1, &ctx->dst_dma_fd); // 分配1个内存，因为后续的使用和销毁默认都是1，如果需要创建多个buffer，则需要修改对应的释放部分，以防出现内存泄漏。
     TEST_ERROR(ret == -1, "create dmabuf failed", error);
 #if 0
     if (!ctx->disable_rendering)
