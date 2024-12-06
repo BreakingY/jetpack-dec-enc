@@ -83,7 +83,6 @@ public:
 private:
     JetsonDecListner *p_callback;
     bool m_abort = false;
-    bool m_abort_cap = false;
     pthread_t job_tid;
     pthread_t dec_tid;
     bool proc_ready = false;
