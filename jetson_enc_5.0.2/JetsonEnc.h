@@ -66,7 +66,6 @@ public:
 public:
     // jetson enc func
     static void *encode_proc(void *arg);
-    static void *encode_out(void *arg);
     static bool encoder_capture_plane_dq_callback(struct v4l2_buffer *v4l2_buf, NvBuffer *buffer, NvBuffer *shared_buffer, void *arg);
     int encoder_proc_nonblocking(context_t_enc &ctx, bool eos);
     int read_video_frame_my(std::ifstream *stream, NvBuffer &buffer);
@@ -83,6 +82,5 @@ public:
     int fps;
     context_t_enc ctx;
     pthread_t job_tid;
-    pthread_t out_tid;
 };
 #endif

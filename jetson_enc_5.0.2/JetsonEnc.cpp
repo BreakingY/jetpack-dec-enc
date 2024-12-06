@@ -11,7 +11,6 @@ JetsonEnc::JetsonEnc(int width, int height, int video_fps)
     pthread_cond_init(&data_cond, NULL);
     data_list.clear();
     pthread_create(&job_tid, NULL, JetsonEnc::encode_proc, this);
-    // pthread_create(&out_tid, NULL, JetsonEnc::encode_out, this);
 }
 void JetsonEnc::SetDecCallBack(JetsonEncListner *call_func)
 {
@@ -62,10 +61,6 @@ JetsonEnc::~JetsonEnc()
     if (ret != 0) {
         printf("pthread_join iob_tid error\n");
     }
-    // ret=pthread_join(out_tid,NULL);
-    // if(ret!=0){
-    //     printf("pthread_join out_tid error\n");
-    // }
     pthread_mutex_destroy(&data_mutex);
     pthread_cond_destroy(&data_cond);
 
@@ -276,7 +271,7 @@ write_encoder_output_frame(ofstream *stream, NvBuffer *buffer, void *obj_arg)
  * @param shared_buffer : shared NvBuffer
  * @param arg           : context pointer
  */
-static bool JetsonEnc::encoder_capture_plane_dq_callback(struct v4l2_buffer *v4l2_buf, NvBuffer *buffer,
+bool JetsonEnc::encoder_capture_plane_dq_callback(struct v4l2_buffer *v4l2_buf, NvBuffer *buffer,
                                                          NvBuffer *shared_buffer, void *arg)
 {
     context_t_enc *ctx = (context_t_enc *)arg;
@@ -2183,7 +2178,7 @@ cleanup:
             if (ret < 0) {
                 cerr << "Failed to Destroy NvBuffer\n"
                      << endl;
-                return ret;
+                return NULL;
             }
         }
     }
