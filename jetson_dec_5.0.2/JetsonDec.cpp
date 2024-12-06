@@ -20,8 +20,6 @@ JetsonDec::JetsonDec(uint32_t decoder_pixfmt, int width, int height, unsigned ch
     }
     pthread_create(&job_tid, NULL, decode_proc, this);
     pthread_setname_np(job_tid, "OutputPlane");
-    pthread_create(&dec_tid, NULL, dec_capture_loop_fcn, this);
-    pthread_setname_np(dec_tid, "CapturePlane");
 }
 void JetsonDec::SetDecCallBack(JetsonDecListner *call_func)
 {
@@ -37,10 +35,6 @@ JetsonDec::~JetsonDec()
 {
     m_abort = true;
     int ret = pthread_join(job_tid, NULL);
-    if (ret != 0) {
-        printf("pthread_join iob_tid error\n");
-    }
-    ret = pthread_join(dec_tid, NULL);
     if (ret != 0) {
         printf("pthread_join iob_tid error\n");
     }
@@ -354,9 +348,9 @@ void *JetsonDec::dec_capture_loop_fcn(void *arg)
 {
 
     JetsonDec *self = (JetsonDec *)arg;
-    unsigned char *ptr = self->dec_buffer; // 这里需要使用ptr把dec_buffer记录下来，否则后面这个地址可能会失效(地址发生变化)，原因：query_and_set_capture中NvAllocate分配的buffer数量过多会导致位置错误，引起进程空间异常
+    unsigned char *ptr = self->dec_buffer; // 这里需要使用ptr把dec_buffer记录下来，否则后面这个地址可能会失效(地址发生变化)
 
-    while (!self->m_abort && !self->proc_ready) {
+    while (!self->m_abort_cap && !self->proc_ready) {
         usleep(1000);
         continue;
     }
@@ -385,15 +379,15 @@ void *JetsonDec::dec_capture_loop_fcn(void *arg)
             abort(ctx);
             break;
         }
-    } while (!self->m_abort && ev.type != V4L2_EVENT_RESOLUTION_CHANGE);
+    } while (!self->m_abort_cap && ev.type != V4L2_EVENT_RESOLUTION_CHANGE);
     printf("query_and_set_capture bre dec_buffer:%p ptr:%p\n", self->dec_buffer, ptr);
     /* Received the resolution change event, now can do query_and_set_capture */
-    if (!self->m_abort) {
+    if (!self->m_abort_cap) {
         query_and_set_capture(ctx);
     }
     printf("query_and_set_capture after dec_buffer:%p ptr:%p\n", self->dec_buffer, ptr);
     /* Exit on error or EOS which is signalled in main() */
-    while (!(self->m_abort || dec->isInError())) {
+    while (!(self->m_abort_cap || dec->isInError())) {
         NvBuffer *dec_buffer;
 
         /* Check for resolution change again */
@@ -406,7 +400,7 @@ void *JetsonDec::dec_capture_loop_fcn(void *arg)
             }
         }
         /* Decoder capture loop */
-        while (!self->m_abort) {
+        while (1) {
             struct v4l2_buffer v4l2_buf;
             struct v4l2_plane planes[MAX_PLANES];
 
@@ -474,7 +468,6 @@ void *JetsonDec::decode_proc(void *arg)
     int ret = 0;
     int error = 0;
     uint32_t i;
-    char *nalu_parse_buffer = NULL;
 
     /* Set default values for decoder context members */
     set_defaults(&ctx);
@@ -511,7 +504,6 @@ void *JetsonDec::decode_proc(void *arg)
     ret = ctx.dec->setOutputPlaneFormat(ctx.decoder_pixfmt, CHUNK_SIZE);
     TEST_ERROR(ret < 0, "Could not set output plane format", cleanup);
 
-    nalu_parse_buffer = new char[CHUNK_SIZE];
     ret = ctx.dec->setFrameInputMode(0);
     TEST_ERROR(ret < 0, "Error in decoder setFrameInputMode", cleanup);
 
@@ -528,9 +520,9 @@ void *JetsonDec::decode_proc(void *arg)
     ret = ctx.dec->output_plane.setStreamStatus(true);
     TEST_ERROR(ret < 0, "Error in output plane stream on", cleanup);
 
-    // pthread_create(&ctx.dec_capture_loop, NULL, self->dec_capture_loop_fcn, self);
-    // pthread_setname_np(ctx.dec_capture_loop,"CapturePlane");
     // self->proc_ready = true;
+    pthread_create(&self->dec_tid, NULL, dec_capture_loop_fcn, self);
+    pthread_setname_np(self->dec_tid, "CapturePlane");
 
     /* Read encoded data and enqueue all the output plane buffers.
        Exit loop in case end of file */
@@ -622,7 +614,11 @@ void *JetsonDec::decode_proc(void *arg)
     }
 
 cleanup:
-
+    self->m_abort_cap = true;
+    ret = pthread_join(self->dec_tid, NULL);
+    if (ret != 0) {
+        printf("pthread_join iob_tid error\n");
+    }
     /* The decoder destructor does all the cleanup i.e set streamoff on output
        and capture planes, unmap buffers, tell decoder to deallocate buffer
        (reqbufs ioctl with counnt = 0), and finally call v4l2_close on the fd */
@@ -636,7 +632,6 @@ cleanup:
             error = 1;
         }
     }
-    delete[] nalu_parse_buffer;
 
     return NULL;
 }
