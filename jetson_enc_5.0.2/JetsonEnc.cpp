@@ -55,8 +55,8 @@ int JetsonEnc::GetQueueSize(){
 JetsonEnc::~JetsonEnc()
 {
     m_abort = true;
-    ctx.got_error = true;
-    ctx.enc->abort();
+    // ctx.got_error = true;
+    // ctx.enc->abort();
     int ret = pthread_join(job_tid, NULL);
     if (ret != 0) {
         printf("pthread_join iob_tid error\n");
@@ -98,7 +98,7 @@ int JetsonEnc::read_video_frame_my(std::ifstream *stream, NvBuffer &buffer)
         pthread_cond_timedwait(&data_cond, &data_mutex, &end_tm);
     }
     if (m_abort) {
-        return 0;
+        return -1;
     }
     YUVData *node = data_list.front();
     data_list.pop_front();
@@ -915,6 +915,7 @@ static void *encoder_pollthread_fcn(void *arg)
         /* Can check the devicepoll.resp_events bitmask to see which events are set. */
         sem_post(&ctx->encoderthread_sema);
     }
+    cout << "encoder_pollthread_fcn exited\n";
     return NULL;
 }
 
@@ -937,7 +938,7 @@ int JetsonEnc::encoder_proc_nonblocking(context_t_enc &ctx, bool eos)
        dequeue a buffer from output plane before we can read new data into it
        and queue it again. */
     int ret = 0;
-
+    JetsonEnc *self = (JetsonEnc*)ctx.arg_obj;
     while (!ctx.got_error && !ctx.enc->isInError()) {
         /* Call SetPollInterrupt */
         ctx.enc->SetPollInterrupt();
@@ -1156,14 +1157,12 @@ int JetsonEnc::encoder_proc_nonblocking(context_t_enc &ctx, bool eos)
                                                                     &ctx);
             if (!capture_dq_continue) {
                 cout << "Capture plane dequeued 0 size buffer " << endl;
-                // ctx.got_eos = true;
-                // return 0;
-                break;
+                ctx.got_eos = true;
+                sem_post(&ctx.pollthread_sema);
+                return 0;
             }
-            // break;
         }
     }
-
     return 0;
 }
 
