@@ -109,6 +109,7 @@ private:
     pthread_t tid_;
     bool run_flag_ = true;
     int recv_rtp_packet_timeout_ = 2; // 秒
+    bool run_tid_ = false;
 
     RTPDemuxer *rtp_video_demuxer_ = NULL;
     RTPDemuxer *rtp_audio_demuxer_ = NULL;
