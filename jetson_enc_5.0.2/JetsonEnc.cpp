@@ -1379,6 +1379,7 @@ void *JetsonEnc::encode_proc(void *arg)
     ctx.iframe_interval = self->fps * 2;
     ctx.idr_interval = self->fps * 2;
     ctx.insert_sps_pps_at_idr = true;
+    ctx.insert_vui = true;
     // ctx.insert_aud = true;
     ctx.hw_preset_type = V4L2_ENC_HW_PRESET_ULTRAFAST;
     // ctx.alliframes = true;
