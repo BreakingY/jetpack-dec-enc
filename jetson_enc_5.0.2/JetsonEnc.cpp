@@ -242,7 +242,7 @@ static void CloseCrc(Crc **phCrc)
  * @param stream : output stream
  * @param buffer : output nvbuffer
  */
-char *enc_filename = "out.h264";
+const char *enc_filename = "out.h264";
 FILE *enc_fd = NULL;
 static int
 write_encoder_output_frame(ofstream *stream, NvBuffer *buffer, void *obj_arg)
@@ -1391,9 +1391,9 @@ void *JetsonEnc::encode_proc(void *arg)
     ctx.height = self->image_height;
 
     /*not use*/
-    char *ptr = "../352_288.yuv";
+    const char *ptr = "../352_288.yuv";
     ctx.in_file_path = strdup(ptr);
-    char *tmp = "enc_out.h264";
+    const char *tmp = "enc_out.h264";
     ctx.out_file_path = strdup(tmp);
 
     /* Set thread name for encoder Output Plane thread. */

@@ -52,7 +52,7 @@ int main(int argc, char **argv)
     while (!yuv_file.eof()) {
         char *buffer = new char[frame_size];
         yuv_file.read(buffer, frame_size);
-        test->AddFrame(buffer, frame_size);
+        test->AddFrame((unsigned char *)buffer, frame_size);
         // JetsonEnc中编码完会释放buffer，此处无需释放，这样做的目的是减少拷贝
         // delete buffer;
         frames++;

@@ -22,16 +22,16 @@ Wrapper::Wrapper(char *path)
     decoder_pixfmt_ = V4L2_PIX_FMT_H264;
     jetson_dec_obj_->SetDecCallBack(static_cast<JetsonDecListner *>(this));
 }
-char *dec_filename = "out.yuv";
+const char *dec_filename = "out.yuv";
 FILE *dec_fd = NULL;
 void Wrapper::OnJetsonDecData(unsigned char *data, int data_len, uint64_t timestamp)
 {
     frames_++;
     struct timeval time_dec;
     gettimeofday(&time_dec, NULL);
-    long int time_stamp = 1000 * (time_dec.tv_sec) + (time_dec.tv_usec) / 1000;
+    uint64_t time_stamp = 1000 * (time_dec.tv_sec) + (time_dec.tv_usec) / 1000;
     if (frames_ % 20 == 0) {
-        printf("delta:%ld\n", time_stamp - timestamp);
+        printf("delta:%d\n", (int)(time_stamp - timestamp));
     }
 #if 0
     if(dec_fd==NULL){
@@ -208,7 +208,7 @@ void Wrapper::MediaOverhandle()
 #endif
     return;
 }
-char *dec_filename = "out.yuv";
+const char *dec_filename = "out.yuv";
 FILE *dec_fd = NULL;
 void Wrapper::OnJetsonDecData(unsigned char *data, int data_len, uint64_t timestamp)
 {
@@ -223,7 +223,7 @@ void Wrapper::OnJetsonDecData(unsigned char *data, int data_len, uint64_t timest
         total_ += time_stamp - timestamp;
     }
     if (frames_ % 20 == 0) {
-        printf("delay:%ld avg:%d\n", delay, total_ / (frames_ - n));
+        printf("delay:%d avg:%d\n", delay, (int)(total_ / (frames_ - n)));
     }
 #if 0
     // write to file , NV12
