@@ -40,23 +40,23 @@
 
 using namespace std;
 
-typedef struct MediaDtatSt {
+typedef struct MediaDataSt {
     unsigned char *data;
     int len;
     struct timeval time;
-    MediaDtatSt()
+    MediaDataSt()
     {
         data = NULL;
         len = 0;
     };
-    ~MediaDtatSt()
+    ~MediaDataSt()
     {
         if (data) {
             free(data);
             data = NULL;
         }
     };
-} MediaDtat;
+} MediaData;
 class JetsonDecListner
 {
 public:
@@ -89,7 +89,7 @@ private:
     bool proc_ready = false;
     pthread_mutex_t mutex_data;
     pthread_cond_t cond_data;
-    list<MediaDtat *> data_list;
+    list<MediaData *> data_list;
     context_t ctx;
     uint32_t dec_pixfmt;
     unsigned char *dec_buffer = NULL;

@@ -40,8 +40,8 @@ JetsonDec::~JetsonDec()
     }
     pthread_mutex_destroy(&mutex_data);
     pthread_cond_destroy(&cond_data);
-    for (std::list<MediaDtat *>::iterator it = data_list.begin(); it != data_list.end(); ++it) {
-        MediaDtat *node = *it;
+    for (std::list<MediaData *>::iterator it = data_list.begin(); it != data_list.end(); ++it) {
+        MediaData *node = *it;
         delete node;
     }
     data_list.clear();
@@ -58,7 +58,7 @@ static void convert_ms_to_timeval(uint64_t ms, struct timeval &tv) {
 }
 void JetsonDec::AddEsData(unsigned char *data, int len, uint64_t time_data)
 {
-    MediaDtat *pData = new MediaDtat();
+    MediaData *pData = new MediaData();
     pData->data = (unsigned char *)malloc(len);
     memcpy(pData->data, data, len);
     pData->len = len;
@@ -114,7 +114,7 @@ int JetsonDec::read_decoder_input_nalu(NvBuffer *buffer, char *parse_buffer, str
         return 0;
     }
     // printf("size:%d\n",data_list.size());
-    MediaDtat *node = data_list.front();
+    MediaData *node = data_list.front();
     data_list.pop_front();
 
     pthread_mutex_unlock(&mutex_data);
