@@ -113,15 +113,12 @@ Wrapper::Wrapper(char *path)
     if( memcmp("rtsp://", path, strlen("rtsp://")) == 0 ){ // rtsp
         rtsp_flag_ = true;
         rtsp_client_proxy_ = new RtspClientProxy(path);
-        rtsp_client_proxy_->ProbeVideoFps(); // 必须在SetDataListner之前调用ProbeVideoFps,否则在RtspClientProxy::RtspVideoData调用data_listner_的时候会阻塞
-        rtsp_client_proxy_->GetVideoCon(width_, height_, fps_);
         rtsp_client_proxy_->SetDataListner(static_cast<MediaDataListner *>(this), [this]() {
             return this->MediaOverhandle();
         });
     }
     else{ // file
         file_reader_ = new MediaReader(path);
-        file_reader_->GetVideoCon(width_, height_, fps_);
         file_reader_->SetDataListner(static_cast<MediaDataListner *>(this), [this]() {
             return this->MediaOverhandle();
         });
@@ -157,6 +154,7 @@ void Wrapper::OnVideoData(VideoData data)
             printf("only support H264/H265\n");
             exit(1);
         }
+        rtsp_client_proxy_->GetVideoCon(width_, height_, fps_);
     }
     else{ // file 
         video_type_ = file_reader_->GetVideoType();
@@ -164,6 +162,7 @@ void Wrapper::OnVideoData(VideoData data)
             printf("only support H264/H265\n");
             exit(1);
         }
+        file_reader_->GetVideoCon(width_, height_, fps_);
     }
     if(video_type_ == VIDEO_H264){
         decoder_pixfmt_ = V4L2_PIX_FMT_H264;
