@@ -1,0 +1,3 @@
+[submodule "jetson_dec_5.0.2/media/Bitstream"]
+	path = jetson_dec_5.0.2/media/Bitstream
+	url = https://github.com/ireader/avcodec
