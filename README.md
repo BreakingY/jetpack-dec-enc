@@ -1,3 +1,5 @@
+# 项目说明
+* Jetson编解码已经集成到另外一个项目，欢迎大家关注，地址：https://github.com/BreakingY/Media-Cognition-Pipeline
 # jetpack-dec-enc
 Jetson Video Encoding and Decoding ; Jetson Jetpack5.x视频编解码库
 * Jetpack版本： 5.0.2
